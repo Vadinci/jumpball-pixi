@@ -1,0 +1,32 @@
+{
+  "name": "jumpball-pixi",
+  "version": "0.0.0",
+  "description": "",
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Vadinci/jumpball-pixi.git"
+  },
+  "author": "Robin Zaagsma",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Vadinci/jumpball-pixi/issues"
+  },
+  "homepage": "https://github.com/Vadinci/jumpball-pixi#readme",
+  "dependencies": {
+    "eslint": "^8.1.0",
+    "html-webpack-plugin": "^5.4.0",
+    "pixi.js": "^6.1.3",
+    "ts-loader": "^9.2.6",
+    "typescript": "^4.4.4",
+    "webpack": "^5.59.1",
+    "webpack-cli": "^4.9.1"
+  },
+  "devDependencies": {
+    "copy-webpack-plugin": "^9.0.1",
+    "webpack-dev-server": "^4.3.1"
+  }
+}

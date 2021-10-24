@@ -1,0 +1,19 @@
+{
+	"compilerOptions": {
+		"outDir": "./dist",
+		"allowJs": false,
+		"target": "es5",
+		"moduleResolution": "node",
+		"declaration": true,
+		"declarationMap": true,
+		"removeComments": true,
+		"noImplicitAny": true,
+		"experimentalDecorators": true,
+		"strict": true
+	},
+	"include": [
+		"./src/**/*.ts"
+	], "exclude": [
+		"node_modules"
+	]
+}
