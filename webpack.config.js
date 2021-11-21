@@ -34,7 +34,7 @@ module.exports = {
 		}),
 		new CopyWebpackPlugin({
 			patterns: [
-				//{ from: './src/assets', to: 'assets' },
+				{ from: './assets', to: 'assets' },
 				//{ from: './src/assets.yaml', to: 'assets.yaml' },
 				{ from: './src/reset.css', to: 'reset.css' }
 			]
