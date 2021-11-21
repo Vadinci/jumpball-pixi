@@ -2,6 +2,9 @@ import { Component } from "./Component";
 import { Entity } from "./Entity";
 import { Family } from "./Family";
 import { Filter } from "./Filter";
+import { AggregateFilter } from "./filters/AggregateFilter";
+import { ExclusionFilter } from "./filters/ExclusionFilter";
+import { InclusionFilter } from "./filters/InclusionFilter";
 
 export type ComponentMap = { [key: string]: Component<any> };
 type ComponentKey<T extends ComponentMap> = keyof T;
@@ -73,8 +76,12 @@ dummyWorld.addComponent(e, "foo", { x: 10, y: 12 });
 console.log(dummyWorld.getComponent(e, "foo"));
 // dummyWorld.addComponent(e, "foo", { x: 10, y: 12 });
 
-const testFilter = new Filter(dummyWorld, ["foo", "bar"]);
-const testArray = testFilter.getIncludedTypes();
+const testFilter = new InclusionFilter(dummyWorld, ["foo"]);
+const testFilter2 = new InclusionFilter(dummyWorld, ["bar"]);
+const testFilter3 = new InclusionFilter(dummyWorld2, ["qux"]);
+const testFilter4 = new ExclusionFilter(dummyWorld, ["bar"]);
+const aggFilter = new AggregateFilter([testFilter, testFilter4]);
 
-const testFamily = new Family(dummyWorld, testFilter);
+const testFamily = new Family(dummyWorld, aggFilter);
 let comps = testFamily.getComponents(e);
+

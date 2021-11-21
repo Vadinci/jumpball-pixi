@@ -4,7 +4,8 @@ import { Entity } from "./Entity";
 import { Filter } from "./Filter";
 import { ComponentMap, World } from "./World";
 
-export class Family<Q extends ComponentMap, T extends (keyof Q)[]> {
+type FamilyComponents<Q extends ComponentMap, T extends keyof Q> = { [key in Extract<keyof Q, T>]: ReturnType<Q[key]["getEntityData"]> };
+export class Family<Q extends ComponentMap, T extends keyof Q> {
 
 	private _filter: Filter<Q, T>;
 	private _world: World<Q>;
@@ -14,18 +15,14 @@ export class Family<Q extends ComponentMap, T extends (keyof Q)[]> {
 		this._world = world;
 	}
 
-	/*public forEach(callback: (entity: Entity, components: {[key in keyof T]: Q[T]}) => void) {
-
-	}*/
-
-	public getComponents(entity: Entity) { //({ [K in keyof T]: Q[K] }) {
-		let foo: { [key in keyof Q]?: Q[key] } = {};
+	public getComponents(entity: Entity): FamilyComponents<Q, T> {
+		// @TODO hacky typing going on here
+		let components: any = {};
 
 		this._filter.getIncludedTypes().forEach(type => {
-			foo[type] = this._world.getComponent(entity, type);
+			components[type] = this._world.getComponent(entity, type);
 		})
 
-		let foo2 = foo as { [key in Extract<keyof Q, T[number]>]: Q[key]}
-		return foo2;
+		return components as FamilyComponents<Q, T>
 	}
 }
