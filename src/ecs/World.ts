@@ -1,22 +1,25 @@
+import { Event, IListenableEvent } from "../core/classes/Event";
 import { Component } from "./Component";
 import { Entity } from "./Entity";
-import { Family } from "./Family";
-import { Filter } from "./Filter";
-import { AggregateFilter } from "./filters/AggregateFilter";
-import { ExclusionFilter } from "./filters/ExclusionFilter";
-import { InclusionFilter } from "./filters/InclusionFilter";
 
 export type ComponentMap = { [key: string]: Component<any> };
-type ComponentKey<T extends ComponentMap> = keyof T;
 // @TODO can we infer the data type some other way, instead of 'abusing' getEntityData?
-type DataType<T extends ComponentMap, Q extends ComponentKey<T>> = ReturnType<T[Q]["getEntityData"]>;
-
+type DataType<T extends ComponentMap, Q extends keyof T> = ReturnType<T[Q]["getEntityData"]>;
 export class World<T extends ComponentMap> {
-
 	private _components: T;
 
 	private _nextId: number = 0;
 	private _entityPool: Entity[] = [];	// @TODO make proper pool
+
+	private _onComponentAdded: Event<[entity: Entity, componentKey: keyof T]> = new Event();
+	public get onComponentAdded(): IListenableEvent<[entity: Entity, componentKey: keyof T]> {
+		return this._onComponentAdded;
+	}
+
+	private _onComponentRemoved: Event<[entity: Entity, componentKey: keyof T]> = new Event();
+	public get onComponentRemoved(): IListenableEvent<[entity: Entity, componentKey: keyof T]> {
+		return this._onComponentRemoved;
+	}
 
 	public constructor(components: T) {
 		this._components = components;
@@ -28,60 +31,34 @@ export class World<T extends ComponentMap> {
 		return entity;
 	}
 
-	// @TODO can we make componentKey optional? Since Q should always be a string anyway?
-	public addComponent<Q extends ComponentKey<T>>(entity: Entity, componentKey: Q, data: DataType<T, Q>): void {
-		const component: Component<DataType<T, Q>> = this._components[componentKey];
-		component.addToEntity(entity, data);
+	public freeEntity(entity: Entity): void {
+		console.error("free entity is not implemented");
+		// @TODO make all components lose their reference to this entity,
+		// @TODO make getEntity somehow return this entity
 	}
 
-	public getComponent<Q extends ComponentKey<T>>(entity: Entity, componentKey: Q): DataType<T, Q> {
+	// @TODO can we make componentKey optional? Since Q should always be a string anyway?
+	public addComponent<Q extends keyof T>(entity: Entity, componentKey: Q, data: DataType<T, Q>): void {
+		const component: Component<DataType<T, Q>> = this._components[componentKey];
+		component.addToEntity(entity, data);
+
+		this._onComponentAdded.fire(entity, componentKey);
+	}
+
+	public getComponent<Q extends keyof T>(entity: Entity, componentKey: Q): DataType<T, Q> {
 		const component: Component<DataType<T, Q>> = this._components[componentKey];
 		return component.getEntityData(entity);
 	}
 
-	public removeComponent<Q extends ComponentKey<T>>(entity: Entity, componentKey: Q): void {
+	public removeComponent<Q extends keyof T>(entity: Entity, componentKey: Q): void {
 		const component: Component<DataType<T, Q>> = this._components[componentKey];
-		return component.removeFromEntity(entity);
+		component.removeFromEntity(entity);
+
+		this._onComponentRemoved.fire(entity, componentKey);
 	}
 
-	public hasComponent<Q extends ComponentKey<T>>(entity: Entity, componentKey: Q): boolean {
+	public hasComponent<Q extends keyof T>(entity: Entity, componentKey: Q): boolean {
 		const component: Component<DataType<T, Q>> = this._components[componentKey];
 		return component.isOnEntity(entity);
 	}
 }
-
-type GameComponents = {
-	"foo": Component<{ x: number, y: number }>,
-	"bar": Component<{ alias: string }>,
-};
-
-type GameComponents2 = {
-	"qux": Component<{ x: number, y: number }>,
-};
-
-const components: GameComponents = {
-	"foo": new Component<{ x: number, y: number }>(),
-	"bar": new Component<{ alias: string }>(),
-}
-
-const components2: GameComponents2 = {
-	"qux": new Component<{ x: number, y: number }>()
-}
-
-const dummyWorld = new World(components);
-const dummyWorld2 = new World(components2);
-
-const e = dummyWorld.getEntity();
-dummyWorld.addComponent(e, "foo", { x: 10, y: 12 });
-console.log(dummyWorld.getComponent(e, "foo"));
-// dummyWorld.addComponent(e, "foo", { x: 10, y: 12 });
-
-const testFilter = new InclusionFilter(dummyWorld, ["foo"]);
-const testFilter2 = new InclusionFilter(dummyWorld, ["bar"]);
-const testFilter3 = new InclusionFilter(dummyWorld2, ["qux"]);
-const testFilter4 = new ExclusionFilter(dummyWorld, ["bar"]);
-const aggFilter = new AggregateFilter([testFilter, testFilter4]);
-
-const testFamily = new Family(dummyWorld, aggFilter);
-let comps = testFamily.getComponents(e);
-

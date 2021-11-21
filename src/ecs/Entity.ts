@@ -1,3 +1,3 @@
 export type Entity = {
-	id: number;
+	readonly id: number;
 }

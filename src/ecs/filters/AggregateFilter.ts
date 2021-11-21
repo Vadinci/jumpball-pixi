@@ -5,7 +5,7 @@ import { ComponentMap, World } from "../World";
 export class AggregateFilter<Q extends ComponentMap, T extends keyof Q> extends Filter<Q, T> {
 	private _filters: Filter<Q, T>[];
 
-	constructor(/*world: World<Q>,*/ filters: Filter<Q, T>[]) {
+	constructor(filters: Filter<Q, T>[]) {
 		super();
 		this._filters = filters;
 	}
