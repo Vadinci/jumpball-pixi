@@ -3,7 +3,7 @@ import { World } from "../../ecs/World";
 import { GameComponents } from "../Components";
 import { PlatformFactory } from "../platforms/PlatformFactory";
 
-export class PlatformSpawningSystem {
+export class PaddleSpawningSystem {
 	private _world: World<GameComponents>;
 	private _platformFactory: PlatformFactory;
 

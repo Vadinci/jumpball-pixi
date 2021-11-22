@@ -3,14 +3,10 @@ import { Entity } from "./Entity";
 import { Filter } from "./Filter";
 import { ComponentMap, World } from "./World";
 
-type FamilyComponents<Q extends ComponentMap, T extends keyof Q> = { [key in Extract<keyof Q, T>]: ReturnType<Q[key]["getEntityData"]> };
-type FamilyCallback<Q extends ComponentMap, T extends keyof Q> = (entity: Entity, components: FamilyComponents<Q, T>) => void;
+export type FamilyComponents<Q extends ComponentMap, T extends keyof Q> = { [key in Extract<keyof Q, T>]: ReturnType<Q[key]["getEntityData"]> };
+export type FamilyCallback<Q extends ComponentMap, T extends keyof Q> = (entity: Entity, components: FamilyComponents<Q, T>) => void;
 
 export class Family<Q extends ComponentMap, T extends keyof Q> {
-
-	// @TODO ugly, but allows for using `typeof this._family.Components` in systems. Is there a better way without smearing the generics everywhere?
-	public readonly Components: FamilyComponents<Q, T> = null!;
-
 	private _filter: Filter<Q, T>;
 	private _world: World<Q>;
 

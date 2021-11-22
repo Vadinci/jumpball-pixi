@@ -19,12 +19,14 @@ export class PlatformFactory {
 		// add sprite
 		const sprite = new NineSlicePlane(this._resources.resources["paddle"].texture!, 8, 4, 8, 4);	// @TODO
 		sprite.width = 64; //@TODO
+		sprite.pivot.set(sprite.width / 2, 0);
 
 		this._world.addComponent(e, "displayObject", { displayObject: sprite });
 		this._world.addComponent(e, "velocity", { x: 0, y: 1 });
+		this._world.addComponent(e, "topCollision", { width: 64 });	// @TODO
 	}
 
 	private _addDefaults(e: Entity) {
-	
+
 	}
 }

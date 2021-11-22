@@ -1,6 +1,6 @@
 import { Container, DisplayObject } from "@pixi/display";
 import { Entity } from "../../ecs/Entity";
-import { Family } from "../../ecs/Family";
+import { Family, FamilyComponents } from "../../ecs/Family";
 import { InclusionFilter } from "../../ecs/filters/InclusionFilter";
 import { World } from "../../ecs/World";
 import { GameComponents, gameComponents } from "../Components";
@@ -35,9 +35,9 @@ export class DisplayObjectSystem {
 		})
 	}
 
-	public tick(): void {};
+	public tick(): void { };
 
-	private _onEntityAdded({ id }: Entity, components: typeof this._family.Components): void {
+	private _onEntityAdded({ id }: Entity, components: FamilyComponents<GameComponents, "displayObject">): void {
 		this._displayObjectMap.set(id, components.displayObject.displayObject);
 		this._container.addChild(components.displayObject.displayObject);
 	}
