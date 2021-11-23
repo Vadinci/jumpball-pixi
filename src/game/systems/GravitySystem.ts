@@ -1,28 +1,19 @@
-import { Container, DisplayObject } from "@pixi/display";
-import { Entity } from "../../ecs/Entity";
-import { Family, FamilyComponents } from "../../ecs/Family";
-import { InclusionFilter } from "../../ecs/filters/InclusionFilter";
-import { World } from "../../ecs/World";
-import { GameComponents } from "../Components";
+import { BaseSystem, World, Family } from "../BaseSystem";
 import { GRAVITY } from "../Constants";
-import { Game } from "../Game";
 
-export class GravitySystem {
-	private _family: Family<GameComponents, "velocity" | "gravity">;
-	private _world: World<GameComponents>;
+export class GravitySystem extends BaseSystem {
+	private _family: Family<"velocity" | "gravity">;
 
-	constructor(world: World<GameComponents>) {
-		this._world = world;
+	constructor(world: World) {
+		super(world);
 
-		this._family = new Family(world, new InclusionFilter(world, [
+		this._family = this._createFamily([
 			"velocity",
 			"gravity"
-		]));
+		]);
 	}
 
-	public update(): void { }
-
-	public tick(): void {
+	public override tick(): void {
 		this._family.forEach((entity, components) => {
 			this._world.addComponent(entity, "velocity", {
 				x: components.velocity.x,

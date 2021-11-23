@@ -1,46 +1,37 @@
 import { Entity } from "../../ecs/Entity";
-import { Family, FamilyComponents } from "../../ecs/Family";
-import { InclusionFilter } from "../../ecs/filters/InclusionFilter";
-import { World } from "../../ecs/World";
-import { CmpTopCollision, CpmResolvedCollision, GameComponents } from "../Components";
+import { BaseSystem, Family, FamilyComponents, World } from "../BaseSystem";
+import { CpmResolvedCollision, GameComponents } from "../Components";
 import { GRAVITY } from "../Constants";
-import { ISystem } from "../interfaces/ISystem";
 
 type TopCollider = "position" | "topCollision";
 type Player = "player" | "position" | "velocity";
 
-export class CollisionSystem implements ISystem {
-	private _topColliderFamily: Family<GameComponents, TopCollider>;
-	private _playerFamily: Family<GameComponents, Player>;
+export class CollisionSystem extends BaseSystem {
+	private _topColliderFamily: Family<TopCollider>;
+	private _playerFamily: Family<Player>;
 
-	private _world: World<GameComponents>;
+	constructor(world: World) {
+		super(world);
 
-	constructor(world: World<GameComponents>) {
-		this._world = world;
-
-		this._topColliderFamily = new Family(world, new InclusionFilter(world, [
+		this._topColliderFamily = this._createFamily([
 			"position",
 			"topCollision"
-		]));
+		]);
 
-		this._playerFamily = new Family(world, new InclusionFilter(world, [
+		this._playerFamily = this._createFamily([
 			"player",
 			"position",
 			"velocity"
-		]));
+		]);
 	}
 
-	public update(dt: number): void {
-		//
-	}
-
-	public tick(): void {
+	public override tick(): void {
 		this._playerFamily.forEach((player, components) => {
 			this._findCollisionForPlayer(player, components);
 		});
 	}
 
-	private _findCollisionForPlayer(player: Entity, playerComponents: FamilyComponents<GameComponents, Player>) {
+	private _findCollisionForPlayer(player: Entity, playerComponents: FamilyComponents<Player>) {
 		const pVelocity = playerComponents.velocity;
 		const pPosition = playerComponents.position;
 
@@ -66,8 +57,6 @@ export class CollisionSystem implements ISystem {
 				const bounceHeight: number = 150;	// @TODO might be different per collider
 				const bounceRemaining = bounceHeight - travelRemaining;
 				const newVY = -Math.sqrt(GRAVITY * 2 * bounceRemaining);
-
-				console.log(newVY);
 
 				const collisionData: CpmResolvedCollision = {
 					newY,

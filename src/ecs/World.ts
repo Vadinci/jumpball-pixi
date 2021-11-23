@@ -9,7 +9,8 @@ export class World<T extends ComponentMap> {
 	private _components: T;
 
 	private _nextId: number = 0;
-	private _entityPool: Entity[] = [];	// @TODO make proper pool
+	private _entityPool: Entity[] = [];
+	private _freedEntities: Entity[] = [];
 
 	private _onComponentAdded: Event<[entity: Entity, componentKey: keyof T]> = new Event();
 	public get onComponentAdded(): IListenableEvent<[entity: Entity, componentKey: keyof T]> {
@@ -21,20 +22,32 @@ export class World<T extends ComponentMap> {
 		return this._onComponentRemoved;
 	}
 
+	private _onEntityFreed: Event<[entity: Entity]> = new Event();
+	public get onEntityFreed(): IListenableEvent<[entity: Entity]> {
+		return this._onEntityFreed;
+	}
+
 	public constructor(components: T) {
 		this._components = components;
 	}
 
 	public getEntity(): Entity {
+		console.log("entity count: " + (this._nextId + 1));
+		if (this._freedEntities.length > 0) {
+			return this._freedEntities.pop()!;
+		}
+
 		const entity: Entity = { id: this._nextId++ };
 		this._entityPool.push(entity);
 		return entity;
 	}
 
 	public freeEntity(entity: Entity): void {
-		console.error("free entity is not implemented");
-		// @TODO make all components lose their reference to this entity,
-		// @TODO make getEntity somehow return this entity
+		Object.values(this._components).forEach(component => component.removeFromEntity(entity));
+		this._entityPool.splice(this._entityPool.indexOf(entity), 1);
+		this._freedEntities.push(entity);
+
+		this._onEntityFreed.fire(entity);
 	}
 
 	// @TODO can we make componentKey optional? Since Q should always be a string anyway?

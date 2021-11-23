@@ -1,43 +1,39 @@
 import { Container, DisplayObject } from "@pixi/display";
 import { Entity } from "../../ecs/Entity";
-import { Family, FamilyComponents } from "../../ecs/Family";
-import { InclusionFilter } from "../../ecs/filters/InclusionFilter";
-import { World } from "../../ecs/World";
-import { GameComponents, gameComponents } from "../Components";
+import { BaseSystem, Family, FamilyComponents, World } from "../BaseSystem";
 
-export class DisplayObjectSystem {
-	private _family: Family<GameComponents, "displayObject">;
-	private _positionFamily: Family<GameComponents, "displayObject" | "position">;
+export class DisplayObjectSystem extends BaseSystem {
+	private _family: Family<"displayObject">;
+	private _positionFamily: Family<"displayObject" | "position">;
 
 	private _container: Container;
 
 	private _displayObjectMap: Map<number, DisplayObject> = new Map();
 
-	constructor(world: World<GameComponents>, container: Container) {
+	constructor(world: World, container: Container) {
+		super(world);
 		this._container = container;
 
-		this._family = new Family(world, new InclusionFilter(world, [
+		this._family = this._createFamily([
 			"displayObject"
-		]));
+		]);
 
-		this._positionFamily = new Family(world, new InclusionFilter(world, [
+		this._positionFamily = this._createFamily([
 			"displayObject",
 			"position"
-		]));
+		]);
 
 		this._family.onEntityAdded.listen(this._onEntityAdded, this);
 		this._family.onEntityRemoved.listen(this._onEntityRemoved, this);
 	}
 
-	public update(): void {
+	public override update(): void {
 		this._positionFamily.forEach((e, { position, displayObject }) => {
 			displayObject.displayObject.position.copyFrom(position);
 		})
 	}
 
-	public tick(): void { };
-
-	private _onEntityAdded({ id }: Entity, components: FamilyComponents<GameComponents, "displayObject">): void {
+	private _onEntityAdded({ id }: Entity, components: FamilyComponents<"displayObject">): void {
 		this._displayObjectMap.set(id, components.displayObject.displayObject);
 		this._container.addChild(components.displayObject.displayObject);
 	}

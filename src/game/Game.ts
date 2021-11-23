@@ -8,6 +8,7 @@ import { ISystem } from "./interfaces/ISystem";
 import { CollisionSystem } from "./systems/CollisionSystem";
 import { DisplayObjectSystem } from "./systems/DisplayObjectSystem";
 import { GravitySystem } from "./systems/GravitySystem";
+import { PaddleRemovalSystem } from "./systems/PaddleRemovalSystem";
 import { PaddleSpawningSystem } from "./systems/PaddleSpawningSystem";
 import { VelocitySystem } from "./systems/VelocitySystem";
 export class Game {
@@ -32,7 +33,8 @@ export class Game {
 			new DisplayObjectSystem(world, this._container),
 			new VelocitySystem(world),
 			new GravitySystem(world),
-			new CollisionSystem(world)
+			new CollisionSystem(world),
+			new PaddleRemovalSystem(world)
 		]
 
 		app.ticker.add((dt: number) => {

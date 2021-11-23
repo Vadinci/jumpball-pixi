@@ -1,25 +1,18 @@
-import { Family } from "../../ecs/Family";
-import { InclusionFilter } from "../../ecs/filters/InclusionFilter";
-import { World } from "../../ecs/World";
-import { GameComponents } from "../Components";
+import { BaseSystem, Family, World } from "../BaseSystem";
 
-export class VelocitySystem {
-	private _family: Family<GameComponents, "position" | "velocity">;
+export class VelocitySystem extends BaseSystem {
+	private _family: Family<"position" | "velocity">;
 
-	private _world: World<GameComponents>;
+	constructor(world: World) {
+		super(world);
 
-	constructor(world: World<GameComponents>) {
-		this._world = world;
-
-		this._family = new Family(world, new InclusionFilter(world, [
+		this._family = this._createFamily([
 			"position",
 			"velocity"
-		]));
+		]);
 	}
 
-	public update(): void { }
-
-	public tick(): void {
+	public override tick(): void {
 		this._family.forEach((entity, { position, velocity }) => {
 
 			if (this._world.hasComponent(entity, "resolvedCollision")) {

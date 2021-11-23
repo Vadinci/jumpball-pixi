@@ -18,8 +18,8 @@ export class Family<Q extends ComponentMap, T extends keyof Q> {
 		return this._onEntityAdded;
 	}
 
-	private _onEntityRemoved: Event<[entity: Entity, components: FamilyComponents<Q, T>]> = new Event();
-	public get onEntityRemoved(): IListenableEvent<[entity: Entity, components: FamilyComponents<Q, T>]> {
+	private _onEntityRemoved: Event<[entity: Entity]> = new Event();
+	public get onEntityRemoved(): IListenableEvent<[entity: Entity]> {
 		return this._onEntityRemoved;
 	}
 
@@ -31,6 +31,7 @@ export class Family<Q extends ComponentMap, T extends keyof Q> {
 
 		this._world.onComponentAdded.listen(this._evaluateEntity, this);
 		this._world.onComponentRemoved.listen(this._evaluateEntity, this);
+		this._world.onEntityFreed.listen(this._evaluateEntity, this);	// @TODO can just remove the entity directly, no need to evaluate
 	}
 
 	public forEach(callBack: FamilyCallback<Q, T>): void {
@@ -62,7 +63,7 @@ export class Family<Q extends ComponentMap, T extends keyof Q> {
 		} else {
 			if (idx !== -1) {
 				this._entities.splice(idx, 1);
-				this._onEntityRemoved.fire(entity, this._getComponents(entity));
+				this._onEntityRemoved.fire(entity);
 			}
 		}
 	}
