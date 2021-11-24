@@ -2,11 +2,11 @@ import { Filter } from "../Filter";
 import { Entity } from "../Entity";
 import { ComponentMap, World } from "../World";
 
-export class InclusionFilter<Q extends ComponentMap, T extends keyof Q> extends Filter<Q, T> {
-	private _world: World<Q>;
-	private _components: T[];
+export class InclusionFilter<T extends ComponentMap> extends Filter<T> {
+	private _world: World<T>;
+	private _components: (keyof T)[];
 
-	constructor(world: World<Q>, components: T[]) {
+	constructor(world: World<T>, components: (keyof T)[]) {
 		super();
 		this._world = world;
 		this._components = components;
@@ -21,7 +21,7 @@ export class InclusionFilter<Q extends ComponentMap, T extends keyof Q> extends 
 		return true;
 	}
 
-	public getIncludedTypes(): T[] {
+	public getIncludedTypes(): (keyof T)[] {
 		return this._components;
 	}
 }

@@ -1,13 +1,15 @@
 import { Loader } from "@pixi/loaders";
-import { BaseSystem, World } from "../BaseSystem";
+import { World } from "../../ecs/World";
+import { BaseSystem } from "../BaseSystem";
+import { GameComponents } from "../Components";
 import { PlatformFactory } from "../platforms/PlatformFactory";
 
-export class PaddleSpawningSystem extends BaseSystem {
+export class PaddleSpawningSystem extends BaseSystem<GameComponents> {
 	private _platformFactory: PlatformFactory;
 
 	private _ticksTillSpawn: number = 45;
 
-	constructor(world: World, loader: Loader) {
+	constructor(world: World<GameComponents>, loader: Loader) {
 		super(world);
 		this._platformFactory = new PlatformFactory(world, loader)
 	}

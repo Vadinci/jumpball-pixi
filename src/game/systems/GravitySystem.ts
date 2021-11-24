@@ -1,10 +1,13 @@
-import { BaseSystem, World, Family } from "../BaseSystem";
+import { Family } from "../../ecs/Family";
+import { World } from "../../ecs/World";
+import { BaseSystem } from "../BaseSystem";
+import { GameComponents } from "../Components";
 import { GRAVITY } from "../Constants";
 
-export class GravitySystem extends BaseSystem {
-	private _family: Family<"velocity" | "gravity">;
+export class GravitySystem extends BaseSystem<GameComponents> {
+	private _family: Family<GameComponents>;
 
-	constructor(world: World) {
+	constructor(world: World<GameComponents>) {
 		super(world);
 
 		this._family = this._createFamily([
@@ -14,10 +17,12 @@ export class GravitySystem extends BaseSystem {
 	}
 
 	public override tick(): void {
-		this._family.forEach((entity, components) => {
+		this._family.forEach(entity => {
+			const oldVelocity = this._world.getComponent(entity, "velocity");
+
 			this._world.addComponent(entity, "velocity", {
-				x: components.velocity.x,
-				y: components.velocity.y + GRAVITY
+				x: oldVelocity.x,
+				y: oldVelocity.y + GRAVITY
 			})
 		});
 	};

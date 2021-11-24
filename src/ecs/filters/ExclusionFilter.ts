@@ -2,11 +2,11 @@ import { Filter } from "../Filter";
 import { Entity } from "../Entity";
 import { ComponentMap, World } from "../World";
 
-export class ExclusionFilter<Q extends ComponentMap> extends Filter<Q, ""> {
-	private _world: World<Q>;
-	private _components: (keyof Q)[];
+export class ExclusionFilter<T extends ComponentMap> extends Filter<T> {
+	private _world: World<T>;
+	private _components: (keyof T)[];
 
-	constructor(world: World<Q>, components: (keyof Q)[]) {
+	constructor(world: World<T>, components: (keyof T)[]) {
 		super();
 		this._world = world;
 		this._components = components;

@@ -1,16 +1,19 @@
 import { Container, DisplayObject } from "@pixi/display";
 import { Entity } from "../../ecs/Entity";
-import { BaseSystem, Family, FamilyComponents, World } from "../BaseSystem";
+import { Family } from "../../ecs/Family";
+import { World } from "../../ecs/World";
+import { BaseSystem } from "../BaseSystem";
+import { GameComponents } from "../Components";
 
-export class DisplayObjectSystem extends BaseSystem {
-	private _family: Family<"displayObject">;
-	private _positionFamily: Family<"displayObject" | "position">;
+export class DisplayObjectSystem extends BaseSystem<GameComponents> {
+	private _family: Family<GameComponents>;
+	private _positionFamily: Family<GameComponents>;
 
 	private _container: Container;
 
 	private _displayObjectMap: Map<number, DisplayObject> = new Map();
 
-	constructor(world: World, container: Container) {
+	constructor(world: World<GameComponents>, container: Container) {
 		super(world);
 		this._container = container;
 
@@ -28,21 +31,26 @@ export class DisplayObjectSystem extends BaseSystem {
 	}
 
 	public override update(): void {
-		this._positionFamily.forEach((e, { position, displayObject }) => {
-			displayObject.displayObject.position.copyFrom(position);
+		this._positionFamily.forEach(entity => {
+			const { displayObject } = this._world.getComponent(entity, "displayObject");
+			const position = this._world.getComponent(entity, "position");
+
+			displayObject.position.copyFrom(position);
 		})
 	}
 
-	private _onEntityAdded({ id }: Entity, components: FamilyComponents<"displayObject">): void {
-		this._displayObjectMap.set(id, components.displayObject.displayObject);
-		this._container.addChild(components.displayObject.displayObject);
+	private _onEntityAdded(entity: Entity): void {
+		const { displayObject } = this._world.getComponent(entity, "displayObject");
+
+		this._displayObjectMap.set(entity.id, displayObject);
+		this._container.addChild(displayObject);
 	}
 
-	private _onEntityRemoved({ id }: Entity): void {
-		const displayObject = this._displayObjectMap.get(id);
+	private _onEntityRemoved(entity: Entity): void {
+		const displayObject = this._displayObjectMap.get(entity.id);
 		if (!displayObject) return;
 
 		this._container.removeChild(displayObject);
-		this._displayObjectMap.delete(id);
+		this._displayObjectMap.delete(entity.id);
 	}
 }

@@ -2,19 +2,15 @@ import { Event, IListenableEvent } from "../core/classes/Event";
 import { Entity } from "./Entity";
 import { Filter } from "./Filter";
 import { ComponentMap, World } from "./World";
-
-export type FamilyComponents<Q extends ComponentMap, T extends keyof Q> = { [key in Extract<keyof Q, T>]: ReturnType<Q[key]["getEntityData"]> };
-export type FamilyCallback<Q extends ComponentMap, T extends keyof Q> = (entity: Entity, components: FamilyComponents<Q, T>) => void;
-
-export class Family<Q extends ComponentMap, T extends keyof Q> {
-	private _filter: Filter<Q, T>;
-	private _world: World<Q>;
+export class Family<T extends ComponentMap> {
+	private _filter: Filter<T>;
+	private _world: World<T>;
 
 	private _entities: Entity[] = [];
-	private readonly _components: T[];
+	private readonly _components: (keyof T)[];
 
-	private _onEntityAdded: Event<[entity: Entity, components: FamilyComponents<Q, T>]> = new Event();
-	public get onEntityAdded(): IListenableEvent<[entity: Entity, components: FamilyComponents<Q, T>]> {
+	private _onEntityAdded: Event<[entity: Entity]> = new Event();
+	public get onEntityAdded(): IListenableEvent<[entity: Entity]> {
 		return this._onEntityAdded;
 	}
 
@@ -23,7 +19,7 @@ export class Family<Q extends ComponentMap, T extends keyof Q> {
 		return this._onEntityRemoved;
 	}
 
-	constructor(world: World<Q>, filter: Filter<Q, T>) {
+	constructor(world: World<T>, filter: Filter<T>) {
 		this._filter = filter;
 		this._world = world;
 
@@ -34,23 +30,11 @@ export class Family<Q extends ComponentMap, T extends keyof Q> {
 		this._world.onEntityFreed.listen(this._evaluateEntity, this);	// @TODO can just remove the entity directly, no need to evaluate
 	}
 
-	public forEach(callBack: FamilyCallback<Q, T>): void {
+	public forEach(callBack: (e: Entity) => void): void {
 		for (let ii = this._entities.length - 1; ii >= 0; ii--) {
 			const entity = this._entities[ii];
-			const components = this._getComponents(entity);
-			callBack(entity, components);
+			callBack(entity);
 		}
-	}
-
-	private _getComponents(entity: Entity): FamilyComponents<Q, T> {
-		// @TODO hacky typing going on here
-		let componentData: any = {};
-
-		this._components.forEach(type => {
-			componentData[type] = this._world.getComponent(entity, type);
-		})
-
-		return componentData as FamilyComponents<Q, T>
 	}
 
 	private _evaluateEntity(entity: Entity): void {
@@ -58,7 +42,7 @@ export class Family<Q extends ComponentMap, T extends keyof Q> {
 		if (this._filter.isApproved(entity)) {
 			if (idx === -1) {
 				this._entities.push(entity);
-				this._onEntityAdded.fire(entity, this._getComponents(entity));
+				this._onEntityAdded.fire(entity);
 			}
 		} else {
 			if (idx !== -1) {
