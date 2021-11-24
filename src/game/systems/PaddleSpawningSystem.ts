@@ -17,7 +17,7 @@ export class PaddleSpawningSystem extends BaseSystem<GameComponents> {
 	public override tick(): void {
 		if (this._ticksTillSpawn-- > 0) return;
 
-		const platform = this._world.getEntity();
+		const platform = this._world.getNewEntity();
 		this._platformFactory.buildNormal(platform);
 		this._world.addComponent(platform, "position", { x: Math.floor(Math.random() * 320), y: -24 });
 

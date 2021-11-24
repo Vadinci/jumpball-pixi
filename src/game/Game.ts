@@ -24,7 +24,7 @@ export class Game {
 
 		console.log("create world");
 		let world = new World(gameComponents);
-		let ePlayer = world.getEntity();
+		let ePlayer = world.getNewEntity();
 
 		console.log("add position to entity");
 
@@ -59,7 +59,7 @@ export class Game {
 
 
 			//bottom paddle
-			const floor = world.getEntity();
+			const floor = world.getNewEntity();
 			world.addComponent(floor, "position", { x: 160, y: 540 });
 			world.addComponent(floor, "topCollision", { width: 320 });
 
