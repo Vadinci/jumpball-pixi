@@ -1,7 +1,7 @@
 import { Application, IApplicationOptions, Ticker } from "pixi.js";
 import { IService } from "../interfaces/IService";
 
-export class App implements IService {
+export class AppService implements IService {
 	private _app: Application;
 	public get app(): Application { return this._app };
 	public get ticker():Ticker { return this._app.ticker};

@@ -9,9 +9,9 @@ export class PaddleSpawningSystem extends BaseSystem<GameComponents> {
 
 	private _ticksTillSpawn: number = 45;
 
-	constructor(world: World<GameComponents>, loader: Loader) {
+	constructor(world: World<GameComponents>) {
 		super(world);
-		this._platformFactory = new PlatformFactory(world, loader)
+		this._platformFactory = new PlatformFactory(world)
 	}
 
 	public override tick(): void {
