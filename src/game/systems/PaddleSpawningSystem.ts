@@ -1,21 +1,23 @@
 import { Loader } from "@pixi/loaders";
-import { BaseSystem, World } from "../BaseSystem";
+import { World } from "../../ecs/World";
+import { BaseSystem } from "../BaseSystem";
+import { GameComponents } from "../Components";
 import { PlatformFactory } from "../platforms/PlatformFactory";
 
-export class PaddleSpawningSystem extends BaseSystem {
+export class PaddleSpawningSystem extends BaseSystem<GameComponents> {
 	private _platformFactory: PlatformFactory;
 
 	private _ticksTillSpawn: number = 45;
 
-	constructor(world: World, loader: Loader) {
+	constructor(world: World<GameComponents>) {
 		super(world);
-		this._platformFactory = new PlatformFactory(world, loader)
+		this._platformFactory = new PlatformFactory(world)
 	}
 
 	public override tick(): void {
 		if (this._ticksTillSpawn-- > 0) return;
 
-		const platform = this._world.getEntity();
+		const platform = this._world.getNewEntity();
 		this._platformFactory.buildNormal(platform);
 		this._world.addComponent(platform, "position", { x: Math.floor(Math.random() * 320), y: -24 });
 

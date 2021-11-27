@@ -2,10 +2,10 @@ import { Filter } from "../Filter";
 import { Entity } from "../Entity";
 import { ComponentMap, World } from "../World";
 
-export class AggregateFilter<Q extends ComponentMap, T extends keyof Q> extends Filter<Q, T> {
-	private _filters: Filter<Q, T>[];
+export class AggregateFilter<T extends ComponentMap> extends Filter<T> {
+	private _filters: Filter<T>[];
 
-	constructor(filters: Filter<Q, T>[]) {
+	constructor(filters: Filter<T>[]) {
 		super();
 		this._filters = filters;
 	}
@@ -19,8 +19,8 @@ export class AggregateFilter<Q extends ComponentMap, T extends keyof Q> extends 
 		return true;
 	}
 
-	public getIncludedTypes(): T[] {
-		return this._filters.reduce((allTypes: T[], filter) => {
+	public getIncludedTypes(): (keyof T)[] {
+		return this._filters.reduce((allTypes: (keyof T)[], filter) => {
 			allTypes.push(...filter.getIncludedTypes());
 			return allTypes;
 		}, [])

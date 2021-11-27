@@ -1,9 +1,12 @@
-import { BaseSystem, Family, World } from "../BaseSystem";
+import { Family } from "../../ecs/Family";
+import { World } from "../../ecs/World";
+import { BaseSystem } from "../BaseSystem";
+import { GameComponents } from "../Components";
 
-export class PaddleRemovalSystem extends BaseSystem {
-	private _family: Family<"position">;
+export class PaddleRemovalSystem extends BaseSystem<GameComponents> {
+	private _family: Family<GameComponents>;
 
-	constructor(world: World) {
+	constructor(world: World<GameComponents>) {
 		super(world);
 
 		this._family = this._createFamily([
@@ -13,8 +16,9 @@ export class PaddleRemovalSystem extends BaseSystem {
 	}
 
 	public override tick(): void {
-		this._family.forEach((entity, components) => {
-			if (components.position.y >= 550) {
+		this._family.forEach(entity => {
+			const position = this._world.getComponent(entity, "position");
+			if (position.y >= 550) {
 				this._world.freeEntity(entity);
 			}
 		})

@@ -31,7 +31,7 @@ export class World<T extends ComponentMap> {
 		this._components = components;
 	}
 
-	public getEntity(): Entity {
+	public getNewEntity(): Entity {
 		console.log("entity count: " + (this._nextId + 1));
 		if (this._freedEntities.length > 0) {
 			return this._freedEntities.pop()!;

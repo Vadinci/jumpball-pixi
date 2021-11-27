@@ -12,43 +12,37 @@ import { PaddleRemovalSystem } from "./systems/PaddleRemovalSystem";
 import { PaddleSpawningSystem } from "./systems/PaddleSpawningSystem";
 import { VelocitySystem } from "./systems/VelocitySystem";
 export class Game {
-
 	private _container: Container;
 
 	constructor() {
 		const app = core.services.app.app;
-		const loader: Loader = new Loader("./assets/");
 
 		this._container = new Container();
 		app.stage.addChild(this._container);
 
 		console.log("create world");
 		let world = new World(gameComponents);
-		let ePlayer = world.getEntity();
+		let ePlayer = world.getNewEntity();
 
 		console.log("add position to entity");
 
 		let systems: ISystem[] = [
-			new PaddleSpawningSystem(world, loader),
+			new PaddleSpawningSystem(world),
 			new DisplayObjectSystem(world, this._container),
 			new VelocitySystem(world),
 			new GravitySystem(world),
 			new CollisionSystem(world),
 			new PaddleRemovalSystem(world)
-		]
-
-		app.ticker.add((dt: number) => {
-			// @TODO separate update and tick loop (core service?)
-			systems.forEach(system => system.tick());
-			systems.forEach(system => system.update(dt));
-		});
-
+		];
 
 		// load assets
-		loader.add("paddle", "paddle.png");
-		loader.add("player", "player.png");
-		loader.onComplete.add(loader => {
-			const playerSprite = new Sprite(loader.resources["player"].texture);
+		const loading = core.services.resources.load([
+			["paddle.png"],
+			["player.png"]
+		]);
+
+		loading.complete.then(() => {
+			const playerSprite = new Sprite(core.services.resources.getTexture("player"));
 			playerSprite.anchor.set(0.5, 1);
 
 			world.addComponent(ePlayer, "displayObject", { displayObject: playerSprite });
@@ -59,11 +53,16 @@ export class Game {
 
 
 			//bottom paddle
-			const floor = world.getEntity();
+			const floor = world.getNewEntity();
 			world.addComponent(floor, "position", { x: 160, y: 540 });
 			world.addComponent(floor, "topCollision", { width: 320 });
 
+			app.ticker.add((dt: number) => {
+				// @TODO separate update and tick loop (core service?)
+				systems.forEach(system => system.tick());
+				systems.forEach(system => system.update(dt));
+			});
+
 		});
-		loader.load();
 	}
 }

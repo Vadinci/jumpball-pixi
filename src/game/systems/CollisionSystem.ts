@@ -1,16 +1,18 @@
 import { Entity } from "../../ecs/Entity";
-import { BaseSystem, Family, FamilyComponents, World } from "../BaseSystem";
+import { Family } from "../../ecs/Family";
+import { World } from "../../ecs/World";
+import { BaseSystem } from "../BaseSystem";
 import { CpmResolvedCollision, GameComponents } from "../Components";
 import { GRAVITY } from "../Constants";
 
 type TopCollider = "position" | "topCollision";
 type Player = "player" | "position" | "velocity";
 
-export class CollisionSystem extends BaseSystem {
-	private _topColliderFamily: Family<TopCollider>;
-	private _playerFamily: Family<Player>;
+export class CollisionSystem extends BaseSystem<GameComponents> {
+	private _topColliderFamily: Family<GameComponents>;
+	private _playerFamily: Family<GameComponents>;
 
-	constructor(world: World) {
+	constructor(world: World<GameComponents>) {
 		super(world);
 
 		this._topColliderFamily = this._createFamily([
@@ -26,22 +28,23 @@ export class CollisionSystem extends BaseSystem {
 	}
 
 	public override tick(): void {
-		this._playerFamily.forEach((player, components) => {
-			this._findCollisionForPlayer(player, components);
-		});
+		this._playerFamily.forEach(player => this._findCollisionForPlayer(player));
 	}
 
-	private _findCollisionForPlayer(player: Entity, playerComponents: FamilyComponents<Player>) {
-		const pVelocity = playerComponents.velocity;
-		const pPosition = playerComponents.position;
+	private _findCollisionForPlayer(player: Entity) {
+		const pVelocity = this._world.getComponent(player, "velocity");
+		const pPosition = this._world.getComponent(player, "position");
 
 		let collisions: { y: number, collisionData: CpmResolvedCollision }[] = [];
 
 		if (pVelocity.y > 0) {
-			this._topColliderFamily.forEach((collider, colliderComponents) => {
-				const left = colliderComponents.position.x - colliderComponents.topCollision.width / 2;
-				const right = colliderComponents.position.x + colliderComponents.topCollision.width / 2;
-				const colliderY = colliderComponents.position.y;
+			this._topColliderFamily.forEach(collider => {
+				const cPosition = this._world.getComponent(collider, "position");
+				const cWidth = this._world.getComponent(collider, "topCollision").width;
+
+				const left = cPosition.x - cWidth / 2;
+				const right = cPosition.x + cWidth / 2;
+				const colliderY = cPosition.y;
 
 				if (pPosition.x < left || pPosition.x > right) return;
 
