@@ -8,6 +8,7 @@ import { ISystem } from "./interfaces/ISystem";
 import { DisplayObjectSystem } from "./systems/DisplayObjectSystem";
 import { PaddleRemovalSystem } from "./systems/PaddleRemovalSystem";
 import { PaddleSpawningSystem } from "./systems/PaddleSpawningSystem";
+import { PlayerControllerSystem } from "./systems/PlayerControllerSystem";
 import { PlayerMovementSystem } from "./systems/PlayerMovementSystem";
 import { VelocitySystem } from "./systems/VelocitySystem";
 export class Game {
@@ -21,16 +22,17 @@ export class Game {
 
 		console.log("create world");
 		let world = new World(gameComponents);
+		
 		let ePlayer = world.getNewEntity();
-
-		console.log("add position to entity");
+		world.addComponent(ePlayer, "position", { x: 160, y: 12 });
 
 		let systems: ISystem[] = [
 			new PaddleSpawningSystem(world),
-			new DisplayObjectSystem(world, this._container),
+			new PlayerControllerSystem(world, ePlayer),
 			new PlayerMovementSystem(world, ePlayer),
 			new VelocitySystem(world),
-			new PaddleRemovalSystem(world)
+			new PaddleRemovalSystem(world),
+			new DisplayObjectSystem(world, this._container)
 		];
 
 		// load assets
@@ -44,7 +46,7 @@ export class Game {
 			playerSprite.anchor.set(0.5, 1);
 
 			world.addComponent(ePlayer, "displayObject", { displayObject: playerSprite });
-			world.addComponent(ePlayer, "position", { x: 160, y: 12 });
+			
 			world.addComponent(ePlayer, "velocity", { x: 0, y: -10 });
 			world.addComponent(ePlayer, "player", {});
 
