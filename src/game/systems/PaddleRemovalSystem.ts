@@ -18,7 +18,7 @@ export class PaddleRemovalSystem extends BaseSystem<GameComponents> {
 	public override tick(): void {
 		this._family.forEach(entity => {
 			const position = this._world.getComponent(entity, "position");
-			if (position.y >= 550) {
+			if (position.y >= 580) { // @TODO find bottom of screen
 				this._world.freeEntity(entity);
 			}
 		})

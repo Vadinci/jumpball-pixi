@@ -5,11 +5,10 @@ import { core } from "../core";
 import { World } from "../ecs/World";
 import { gameComponents } from "./Components";
 import { ISystem } from "./interfaces/ISystem";
-import { CollisionSystem } from "./systems/CollisionSystem";
 import { DisplayObjectSystem } from "./systems/DisplayObjectSystem";
-import { GravitySystem } from "./systems/GravitySystem";
 import { PaddleRemovalSystem } from "./systems/PaddleRemovalSystem";
 import { PaddleSpawningSystem } from "./systems/PaddleSpawningSystem";
+import { PlayerMovementSystem } from "./systems/PlayerMovementSystem";
 import { VelocitySystem } from "./systems/VelocitySystem";
 export class Game {
 	private _container: Container;
@@ -29,9 +28,8 @@ export class Game {
 		let systems: ISystem[] = [
 			new PaddleSpawningSystem(world),
 			new DisplayObjectSystem(world, this._container),
+			new PlayerMovementSystem(world, ePlayer),
 			new VelocitySystem(world),
-			new GravitySystem(world),
-			new CollisionSystem(world),
 			new PaddleRemovalSystem(world)
 		];
 
@@ -48,7 +46,6 @@ export class Game {
 			world.addComponent(ePlayer, "displayObject", { displayObject: playerSprite });
 			world.addComponent(ePlayer, "position", { x: 160, y: 12 });
 			world.addComponent(ePlayer, "velocity", { x: 0, y: -10 });
-			world.addComponent(ePlayer, "gravity", {});
 			world.addComponent(ePlayer, "player", {});
 
 

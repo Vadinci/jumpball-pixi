@@ -2,40 +2,64 @@ import { Entity } from "../../ecs/Entity";
 import { Family } from "../../ecs/Family";
 import { World } from "../../ecs/World";
 import { BaseSystem } from "../BaseSystem";
-import { CpmResolvedCollision, GameComponents } from "../Components";
+import { CmpPosition, CmpVelocity, GameComponents } from "../Components";
 import { GRAVITY } from "../Constants";
 
-type TopCollider = "position" | "topCollision";
-type Player = "player" | "position" | "velocity";
+type CollisionData = {
+	positionY: number,
+	collider: Entity,
+	newVY: number,
+	travelRemaining: number
+};
 
-export class CollisionSystem extends BaseSystem<GameComponents> {
+export class PlayerMovementSystem extends BaseSystem<GameComponents> {
 	private _topColliderFamily: Family<GameComponents>;
-	private _playerFamily: Family<GameComponents>;
 
-	constructor(world: World<GameComponents>) {
+	private _player: Entity;
+
+	constructor(world: World<GameComponents>, player: Entity) {
 		super(world);
+
+		this._player = player;
 
 		this._topColliderFamily = this._createFamily([
 			"position",
 			"topCollision"
 		]);
-
-		this._playerFamily = this._createFamily([
-			"player",
-			"position",
-			"velocity"
-		]);
 	}
 
 	public override tick(): void {
-		this._playerFamily.forEach(player => this._findCollisionForPlayer(player));
+		let collision: CollisionData | undefined;
+		const velocity = this._world.getComponent(this._player, "velocity");
+		const position = this._world.getComponent(this._player, "position");
+
+		if (velocity.y > 0) {
+			collision = this._findTopCollision(position, velocity);
+		}
+
+		if (collision) {
+			this._world.addComponent(this._player, "position", {
+				x: position.x,
+				y: collision.positionY - collision.travelRemaining
+			});
+			this._world.addComponent(this._player, "velocity", {
+				x: velocity.x,
+				y: collision.newVY
+			});
+		} else {
+			this._world.addComponent(this._player, "position", {
+				x: position.x,
+				y: position.y + velocity.y
+			});
+			this._world.addComponent(this._player, "velocity", {
+				x: velocity.x,
+				y: velocity.y + GRAVITY
+			});
+		}
 	}
 
-	private _findCollisionForPlayer(player: Entity) {
-		const pVelocity = this._world.getComponent(player, "velocity");
-		const pPosition = this._world.getComponent(player, "position");
-
-		let collisions: { y: number, collisionData: CpmResolvedCollision }[] = [];
+	private _findTopCollision(pPosition: CmpPosition, pVelocity: CmpVelocity): CollisionData | undefined {
+		let collision: CollisionData | undefined;
 
 		if (pVelocity.y > 0) {
 			this._topColliderFamily.forEach(collider => {
@@ -61,19 +85,17 @@ export class CollisionSystem extends BaseSystem<GameComponents> {
 				const bounceRemaining = bounceHeight - travelRemaining;
 				const newVY = -Math.sqrt(GRAVITY * 2 * bounceRemaining);
 
-				const collisionData: CpmResolvedCollision = {
-					newY,
-					newVY
+				if (!collision || cPosition.y < collision.positionY) {
+					collision = {
+						positionY: cPosition.y,
+						collider,
+						newVY,
+						travelRemaining
+					}
 				}
-
-				collisions.push({ y: colliderY, collisionData });
 			});
-
-			collisions.sort((a, b) => a.y - b.y);
 		}
 
-		if (collisions.length > 0) {
-			this._world.addComponent(player, "resolvedCollision", collisions[0].collisionData);
-		}
+		return collision;
 	}
 }
